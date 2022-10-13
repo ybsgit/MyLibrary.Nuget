@@ -2,49 +2,35 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
-
-variables:
-  version: 1.0.2-$(Build.BuildId)
+ vmImage: 'ubuntu-16.04'
 
 stages:
-- stage: Build_Stage
-  displayName: 
-  jobs:
-  - job: BuildNuget
-    displayName: Build Nuget packages
-    variables:
-      BuildConfiguration: release
-    steps:
-
-    - task: DotNetCoreCLI@2
-      displayName: Restore Packages
-      inputs:
-        command: 'restore'
-        projects: '**/*.csproj'
-        feedsToUse: 'select'
-
-    - task: DotNetCoreCLI@2
-      displayName: Build Apps
-      inputs:
-        command: 'build'
-        projects: '**/*.csproj'
-        arguments: '--configuration $(BuildConfiguration)'
-
-    - script: printenv
-
-    - task: DotNetCoreCLI@2
-      displayName: Pack Nuget Package
-      inputs:
-        command: 'pack'
-        packagesToPack: '**/*.csproj'
-        versioningScheme: 'byEnvVar'
-        versionEnvVar: 'version'
-
-    - task: DotNetCoreCLI@2
-      displayName: Push Nuget Package
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-        nuGetFeedType: 'internal'
-        publishVstsFeed: 'a02513cd-1272-4398-8fd8-5a1473eab7c5/00c683e5-28b9-42ad-a0cf-f0b29cc0b365'
+  - stage: Build_Stage
+    displayName: Build Nuget Packages
+    jobs:
+      - job: BuildNuget
+        displayName: Build nuget packages
+        variables: 
+            BuildConfiguration: 'release'
+        steps:
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+              feedsToUse: 'select'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(BuildConfiguration)'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'pack'
+              packagesToPack: '**/*.csproj'
+              versioningScheme: 'off'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'push'
+              packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+              nuGetFeedType: 'internal'
+              publishVstsFeed: 'cc27578c-cb08-4001-8233-a80286851f5b/8d9eeaef-9d61-43eb-8bc3-bc833378259e'
